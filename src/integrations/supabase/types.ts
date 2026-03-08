@@ -14,7 +14,86 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      scenarios: {
+        Row: {
+          affected_sectors: string[] | null
+          assumptions: Json | null
+          created_at: string
+          geography: Json | null
+          id: string
+          name: string
+          policy_lever: string
+          time_horizon: string
+          updated_at: string
+        }
+        Insert: {
+          affected_sectors?: string[] | null
+          assumptions?: Json | null
+          created_at?: string
+          geography?: Json | null
+          id?: string
+          name?: string
+          policy_lever: string
+          time_horizon: string
+          updated_at?: string
+        }
+        Update: {
+          affected_sectors?: string[] | null
+          assumptions?: Json | null
+          created_at?: string
+          geography?: Json | null
+          id?: string
+          name?: string
+          policy_lever?: string
+          time_horizon?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      simulation_results: {
+        Row: {
+          behavior_matrix: Json | null
+          comparison_metrics: Json | null
+          created_at: string
+          emergent_behaviors: Json | null
+          id: string
+          network_states: Json | null
+          scenario_id: string
+          sensitivity_params: Json | null
+          timeline_events: Json | null
+        }
+        Insert: {
+          behavior_matrix?: Json | null
+          comparison_metrics?: Json | null
+          created_at?: string
+          emergent_behaviors?: Json | null
+          id?: string
+          network_states?: Json | null
+          scenario_id: string
+          sensitivity_params?: Json | null
+          timeline_events?: Json | null
+        }
+        Update: {
+          behavior_matrix?: Json | null
+          comparison_metrics?: Json | null
+          created_at?: string
+          emergent_behaviors?: Json | null
+          id?: string
+          network_states?: Json | null
+          scenario_id?: string
+          sensitivity_params?: Json | null
+          timeline_events?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "simulation_results_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
