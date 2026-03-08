@@ -10,7 +10,7 @@ const metrics = [
 
 export function TopMetrics() {
   return (
-    <div className="grid grid-cols-5 gap-3">
+    <>
       {metrics.map((m, i) => (
         <motion.div
           key={m.label}
@@ -24,6 +24,6 @@ export function TopMetrics() {
           <p className="text-[11px] text-muted-foreground mt-0.5">{m.sub}</p>
         </motion.div>
       ))}
-    </div>
+    </>
   );
 }

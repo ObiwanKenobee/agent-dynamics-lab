@@ -41,7 +41,7 @@ export function ScenarioBuilder({ onRun }: { onRun: () => void }) {
     >
       <h3 className="panel-header mb-4">Scenario Builder</h3>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Policy Lever */}
         <div>
           <p className="data-label mb-1.5">Policy Lever</p>

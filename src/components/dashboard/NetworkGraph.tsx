@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { agents } from "@/data/mockAgents";
+import { Play, Pause, RotateCcw } from "lucide-react";
 
 type Node = {
   id: string;
@@ -15,7 +16,9 @@ type Edge = {
   from: string;
   to: string;
   type: "regulation" | "capital" | "pressure" | "dependency" | "trust" | "conflict";
-  strength: number;
+  baseStrength: number;
+  // Keyframes: strength at different simulation phases
+  phases: [number, number, number, number]; // initial, early, mid, late
 };
 
 const edgeColors: Record<string, string> = {
@@ -28,23 +31,27 @@ const edgeColors: Record<string, string> = {
 };
 
 const edges: Edge[] = [
-  { from: "gov", to: "corp", type: "regulation", strength: 0.8 },
-  { from: "inv", to: "corp", type: "capital", strength: 0.9 },
-  { from: "act", to: "gov", type: "pressure", strength: 0.6 },
-  { from: "comm", to: "gov", type: "pressure", strength: 0.5 },
-  { from: "ngo", to: "farm", type: "trust", strength: 0.7 },
-  { from: "corp", to: "comm", type: "dependency", strength: 0.6 },
-  { from: "reg", to: "corp", type: "regulation", strength: 0.85 },
-  { from: "intl", to: "gov", type: "capital", strength: 0.7 },
-  { from: "gov", to: "farm", type: "regulation", strength: 0.5 },
-  { from: "inv", to: "util", type: "capital", strength: 0.6 },
-  { from: "act", to: "corp", type: "conflict", strength: 0.7 },
-  { from: "ngo", to: "comm", type: "trust", strength: 0.8 },
+  { from: "gov", to: "corp", type: "regulation", baseStrength: 0.8, phases: [0.5, 0.8, 0.9, 0.7] },
+  { from: "inv", to: "corp", type: "capital", baseStrength: 0.9, phases: [0.9, 0.6, 0.7, 0.85] },
+  { from: "act", to: "gov", type: "pressure", baseStrength: 0.6, phases: [0.3, 0.6, 0.9, 0.7] },
+  { from: "comm", to: "gov", type: "pressure", baseStrength: 0.5, phases: [0.2, 0.5, 0.8, 0.6] },
+  { from: "ngo", to: "farm", type: "trust", baseStrength: 0.7, phases: [0.7, 0.75, 0.85, 0.9] },
+  { from: "corp", to: "comm", type: "dependency", baseStrength: 0.6, phases: [0.6, 0.5, 0.4, 0.3] },
+  { from: "reg", to: "corp", type: "regulation", baseStrength: 0.85, phases: [0.4, 0.7, 0.9, 0.85] },
+  { from: "intl", to: "gov", type: "capital", baseStrength: 0.7, phases: [0.7, 0.8, 0.75, 0.7] },
+  { from: "gov", to: "farm", type: "regulation", baseStrength: 0.5, phases: [0.3, 0.5, 0.6, 0.5] },
+  { from: "inv", to: "util", type: "capital", baseStrength: 0.6, phases: [0.4, 0.5, 0.7, 0.8] },
+  { from: "act", to: "corp", type: "conflict", baseStrength: 0.7, phases: [0.4, 0.7, 0.9, 0.6] },
+  { from: "ngo", to: "comm", type: "trust", baseStrength: 0.8, phases: [0.8, 0.82, 0.88, 0.92] },
 ];
 
+const phaseLabels = ["Pre-Policy", "Early Response", "Mid-Term Shift", "Long-Term Equilibrium"];
+
 export function NetworkGraph({ visible }: { visible: boolean }) {
-  const containerRef = useRef<HTMLDivElement>(null);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
+  const [phase, setPhase] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval>>();
 
   const width = 600;
   const height = 380;
@@ -67,6 +74,31 @@ export function NetworkGraph({ visible }: { visible: boolean }) {
 
   const nodeMap = Object.fromEntries(nodes.map((n) => [n.id, n]));
 
+  useEffect(() => {
+    if (playing) {
+      intervalRef.current = setInterval(() => {
+        setPhase((p) => {
+          if (p >= 3) {
+            setPlaying(false);
+            return 3;
+          }
+          return p + 1;
+        });
+      }, 2000);
+    }
+    return () => clearInterval(intervalRef.current);
+  }, [playing]);
+
+  const handlePlay = () => {
+    if (phase >= 3) setPhase(0);
+    setPlaying(true);
+  };
+
+  const handleReset = () => {
+    setPlaying(false);
+    setPhase(0);
+  };
+
   if (!visible) return null;
 
   return (
@@ -87,7 +119,7 @@ export function NetworkGraph({ visible }: { visible: boolean }) {
         </div>
       </div>
 
-      <div ref={containerRef} className="relative">
+      <div className="relative">
         <svg width={width} height={height} className="w-full" viewBox={`0 0 ${width} ${height}`}>
           {/* Edges */}
           {edges.map((e, i) => {
@@ -95,6 +127,7 @@ export function NetworkGraph({ visible }: { visible: boolean }) {
             const to = nodeMap[e.to];
             if (!from || !to) return null;
             const isHighlighted = hoveredNode === e.from || hoveredNode === e.to;
+            const strength = e.phases[phase];
             return (
               <line
                 key={i}
@@ -103,10 +136,10 @@ export function NetworkGraph({ visible }: { visible: boolean }) {
                 x2={to.x}
                 y2={to.y}
                 stroke={edgeColors[e.type]}
-                strokeWidth={isHighlighted ? 2 : 1}
-                strokeOpacity={hoveredNode ? (isHighlighted ? 0.8 : 0.1) : 0.3}
+                strokeWidth={Math.max(0.5, strength * 3)}
+                strokeOpacity={hoveredNode ? (isHighlighted ? strength : 0.05) : strength * 0.6}
                 strokeDasharray={e.type === "conflict" ? "4,4" : undefined}
-                className="transition-all duration-300"
+                className="transition-all duration-1000"
               />
             );
           })}
@@ -166,6 +199,42 @@ export function NetworkGraph({ visible }: { visible: boolean }) {
             );
           })}
         </svg>
+      </div>
+
+      {/* Playback Controls */}
+      <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border/30">
+        <button
+          onClick={playing ? () => setPlaying(false) : handlePlay}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-primary/10 text-primary text-xs font-mono hover:bg-primary/20 transition-colors"
+        >
+          {playing ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+          {playing ? "Pause" : "Animate"}
+        </button>
+        <button
+          onClick={handleReset}
+          className="flex items-center gap-1.5 px-2 py-1.5 rounded bg-secondary text-secondary-foreground text-xs font-mono hover:bg-secondary/80 transition-colors"
+        >
+          <RotateCcw className="w-3 h-3" />
+        </button>
+
+        {/* Phase indicator */}
+        <div className="flex-1 flex items-center gap-1">
+          {phaseLabels.map((label, i) => (
+            <button
+              key={i}
+              onClick={() => { setPlaying(false); setPhase(i); }}
+              className={`flex-1 text-center py-1 rounded text-[9px] font-mono transition-all duration-300 ${
+                i === phase
+                  ? "bg-primary/20 text-primary border border-primary/30"
+                  : i < phase
+                  ? "bg-secondary/80 text-muted-foreground"
+                  : "bg-secondary/30 text-muted-foreground/50"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
     </motion.div>
   );
