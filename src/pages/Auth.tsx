@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
+import { lovable } from "@/integrations/lovable";
 import { Activity, Mail, Lock, User, ArrowRight, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
