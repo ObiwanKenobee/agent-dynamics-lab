@@ -40,6 +40,7 @@ export function ScenarioBuilder({ onRun, onConfigChange }: { onRun: () => void; 
 
   const handleRun = () => {
     setIsRunning(true);
+    onConfigChange?.({ policy, horizon, sectors: selectedSectors, geography: selectedRegions });
     setTimeout(() => {
       setIsRunning(false);
       onRun();
