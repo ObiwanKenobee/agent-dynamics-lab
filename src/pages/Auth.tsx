@@ -15,7 +15,24 @@ export default function AuthPage() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const { signIn, signUp, resetPassword } = useAuth();
+  const navigate = useNavigate();
+
+  const handleGoogleSignIn = async () => {
+    setError("");
+    setGoogleLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) throw result.error;
+    } catch (err: any) {
+      setError(err.message || "Google sign-in failed");
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
