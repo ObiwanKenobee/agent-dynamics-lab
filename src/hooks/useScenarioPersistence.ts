@@ -17,7 +17,9 @@ export function useScenarioPersistence() {
   const saveScenario = useCallback(async (config: ScenarioConfig, name?: string) => {
     setIsSaving(true);
     try {
-      // Save scenario
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
       const { data: scenario, error: scenarioError } = await supabase
         .from("scenarios")
         .insert({
@@ -26,13 +28,13 @@ export function useScenarioPersistence() {
           time_horizon: config.horizon,
           affected_sectors: config.sectors,
           geography: config.geography as any,
+          user_id: user.id,
         })
         .select()
         .single();
 
       if (scenarioError) throw scenarioError;
 
-      // Save mock results linked to scenario
       const { error: resultError } = await supabase
         .from("simulation_results")
         .insert({
@@ -40,11 +42,13 @@ export function useScenarioPersistence() {
           timeline_events: simulationTimeline as any,
           behavior_matrix: behaviorMatrix as any,
           comparison_metrics: comparisonMetrics as any,
+          user_id: user.id,
         });
 
       if (resultError) throw resultError;
 
       toast.success("Scenario saved to Cloud");
+      await loadScenarios();
       return scenario.id;
     } catch (err: any) {
       toast.error("Failed to save: " + err.message);

@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       scenarios: {
         Row: {
           affected_sectors: string[] | null
@@ -25,6 +55,7 @@ export type Database = {
           policy_lever: string
           time_horizon: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           affected_sectors?: string[] | null
@@ -36,6 +67,7 @@ export type Database = {
           policy_lever: string
           time_horizon: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           affected_sectors?: string[] | null
@@ -47,6 +79,7 @@ export type Database = {
           policy_lever?: string
           time_horizon?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -61,6 +94,7 @@ export type Database = {
           scenario_id: string
           sensitivity_params: Json | null
           timeline_events: Json | null
+          user_id: string | null
         }
         Insert: {
           behavior_matrix?: Json | null
@@ -72,6 +106,7 @@ export type Database = {
           scenario_id: string
           sensitivity_params?: Json | null
           timeline_events?: Json | null
+          user_id?: string | null
         }
         Update: {
           behavior_matrix?: Json | null
@@ -83,6 +118,7 @@ export type Database = {
           scenario_id?: string
           sensitivity_params?: Json | null
           timeline_events?: Json | null
+          user_id?: string | null
         }
         Relationships: [
           {
