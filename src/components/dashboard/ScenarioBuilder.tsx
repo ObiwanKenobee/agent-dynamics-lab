@@ -17,7 +17,7 @@ const policyLevers = [
 const timeHorizons = ["6 months", "1 year", "5 years", "10 years"];
 const sectors = ["Agriculture", "Energy", "Logistics", "Real Estate", "Finance", "Health"];
 
-export function ScenarioBuilder({ onRun }: { onRun: () => void }) {
+export function ScenarioBuilder({ onRun, onConfigChange }: { onRun: () => void; onConfigChange?: (config: { policy: string; horizon: string; sectors: string[]; geography: string[] }) => void }) {
   const [policy, setPolicy] = useState(policyLevers[0]);
   const [horizon, setHorizon] = useState(timeHorizons[2]);
   const [selectedSectors, setSelectedSectors] = useState<string[]>(["Agriculture", "Energy"]);
