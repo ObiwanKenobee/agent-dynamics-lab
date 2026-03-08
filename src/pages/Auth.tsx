@@ -33,7 +33,6 @@ export default function AuthPage() {
       setGoogleLoading(false);
     }
   };
-  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
